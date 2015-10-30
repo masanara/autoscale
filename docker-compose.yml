@@ -1,0 +1,11 @@
+web:
+  image: web
+  links:
+    - haproxy:consul
+
+haproxy:
+  image: haproxy
+  ports:
+    - 9090:80
+    - 9091:8500
+    - 5601:1936

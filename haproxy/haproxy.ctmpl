@@ -1,0 +1,32 @@
+global
+  daemon
+  maxconn 1024
+  log 127.0.0.1 local0
+  log 127.0.0.1 local1 notice
+
+defaults
+  log global
+  mode http
+  option httplog
+  option dontlognull
+  timeout connect 5000
+  timeout client  50000
+  timeout server  50000
+  maxconn         400
+  option          http-server-close
+
+frontend http-in
+  bind *:80
+  default_backend nodes
+
+backend nodes
+  option httpchk GET /
+  http-check expect status 200
+  mode http
+  balance roundrobin{{range service "web-app"}}
+  server {{.ID}} {{.Address}}:{{.Port}} check inter 1000 {{end}}
+
+listen stats *:1936
+  stats enable
+  stats uri /
+  stats hide-version
